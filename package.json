@@ -1,0 +1,44 @@
+{
+  "name": "claude-plugin-governance",
+  "version": "1.0.0",
+  "description": "Claude Code skill for engineering standards and code governance enforcement",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "claude-plugin",
+    "governance",
+    "code-quality",
+    "standards",
+    "code-review",
+    "engineering-standards",
+    "best-practices",
+    "linting"
+  ],
+  "author": "wrsmith108",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wrsmith108/governance-claude-skill.git"
+  },
+  "homepage": "https://github.com/wrsmith108/governance-claude-skill#readme",
+  "bugs": {
+    "url": "https://github.com/wrsmith108/governance-claude-skill/issues"
+  },
+  "files": [
+    "skills",
+    "templates",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "node skills/governance/scripts/governance-check.mjs",
+    "setup": "node skills/governance/scripts/governance-check.mjs"
+  },
+  "claude-plugin": {
+    "name": "Governance",
+    "description": "Enforce engineering standards during code reviews and commits with proactive reminders and compliance checks",
+    "skills": [
+      "skills/governance"
+    ]
+  }
+}
