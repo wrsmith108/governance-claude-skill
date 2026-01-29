@@ -1,18 +1,19 @@
 {
-  "name": "claude-plugin-governance",
-  "version": "1.0.0",
-  "description": "Claude Code skill for engineering standards and code governance enforcement",
+  "name": "@wrsmith108/governance-skill",
+  "version": "2.0.0",
+  "description": "Claude Code skill for engineering standards enforcement with parallel agent execution",
   "keywords": [
     "claude",
     "claude-code",
     "claude-plugin",
+    "skillsmith",
     "governance",
     "code-quality",
     "standards",
     "code-review",
     "engineering-standards",
     "best-practices",
-    "linting"
+    "automation"
   ],
   "author": "wrsmith108",
   "license": "MIT",
@@ -27,18 +28,24 @@
   "files": [
     "skills",
     "templates",
+    ".claude/agents",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "check": "node skills/governance/scripts/governance-check.mjs",
-    "setup": "node skills/governance/scripts/governance-check.mjs"
+    "setup": "node skills/governance/scripts/governance-check.mjs",
+    "validate": "npx @skillsmith/cli validate .",
+    "publish:registry": "npx @skillsmith/cli publish"
   },
   "claude-plugin": {
     "name": "Governance",
-    "description": "Enforce engineering standards during code reviews and commits with proactive reminders and compliance checks",
+    "description": "Enforce engineering standards during code reviews and commits with parallel agent execution for 70-90% token savings",
     "skills": [
       "skills/governance"
+    ],
+    "agents": [
+      ".claude/agents/governance-specialist.md"
     ]
   }
 }

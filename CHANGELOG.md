@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.0.0] - 2026-01-28
+
+### Breaking Changes
+- Refactored to delegated execution model with `governance-specialist` subagent
+- Skill now acts as orchestrator, delegating verbose operations to parallel agent
+
+### Added
+- `governance-specialist` subagent in `.claude/agents/` for parallel execution
+- `delegates_to` field in SKILL.md frontmatter
+- "How to Invoke" section with Task tool patterns
+- Token efficiency comparison (70-90% savings)
+- Zero Deferral Policy - all issues fixed immediately
+- Structured output format for specialist responses
+
+### Changed
+- Updated triggers to include retrospective support
+- Added explicit commands: `/governance`, `/review`, `/retro`, `/audit`
+- Enhanced anti-pattern documentation
+
 All notable changes to this skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
