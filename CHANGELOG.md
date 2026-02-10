@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.0.1] - 2026-02-10
+
+### Fixed
+- Corrected script invocation paths to use `skills/governance/scripts/` nested directory structure instead of flat `scripts/`
+
 ## [2.0.0] - 2026-01-28
 
 ### Breaking Changes
