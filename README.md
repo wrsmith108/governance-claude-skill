@@ -141,6 +141,12 @@ Governance Score: 100%
 | ❌ Skip audit | ✅ Run `audit:standards` before commit |
 | ❌ Merge without review | ✅ Require approval |
 
+## Changelog
+
+### 2.0.1 (2026-02-10)
+
+- **Fixed**: Corrected script invocation paths to use `skills/governance/scripts/` nested structure
+
 ## Contributing
 
 Contributions welcome! Please submit issues and PRs.

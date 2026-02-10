@@ -1,6 +1,6 @@
 {
   "name": "@wrsmith108/governance-skill",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Claude Code skill for engineering standards enforcement with parallel agent execution",
   "keywords": [
     "claude",
