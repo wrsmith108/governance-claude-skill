@@ -29,7 +29,7 @@ git clone https://github.com/wrsmith108/governance-claude-skill ~/.claude/skills
 ### Verify Setup
 
 ```bash
-node ~/.claude/skills/governance/skills/governance/scripts/governance-check.mjs
+node scripts/governance-check.mjs
 ```
 
 ## How It Works
@@ -78,7 +78,7 @@ This skill enforces a separation of concerns:
 
 4. **Run setup check**:
    ```bash
-   node ~/.claude/skills/governance/skills/governance/scripts/governance-check.mjs
+   node scripts/governance-check.mjs
    ```
 
 ## Templates
