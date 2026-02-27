@@ -6,11 +6,12 @@ A [Claude Code](https://claude.ai/code) skill for enforcing engineering standard
 
 - **Proactive Triggers** — Activates on "code review", "commit", "standards", "compliance"
 - **Two-Document Model** — Separates CLAUDE.md (operational) from standards.md (policy)
-- **Setup Verification** — `governance-check.mjs` validates configuration with actionable fixes
+- **Setup Verification** — `scripts/governance-check.mjs` validates configuration with actionable fixes
 - **Anti-Pattern Tables** — Code quality, documentation, workflow, and testing anti-patterns
 - **Pre-Commit Checklist** — Reminds about typecheck, lint, test before commits
 - **PR Review Checklist** — Standards for code review (correctness, security, performance)
-- **Templates** — Clean starting files for new projects
+- **Ready-to-Use Default** — `standards.md` works out of the box; extend with your own rules
+- **No Custom Agent Required** — Uses the built-in `reviewer` subagent type (v2.1+)
 
 ## Quick Start
 
@@ -29,7 +30,7 @@ git clone https://github.com/wrsmith108/governance-claude-skill ~/.claude/skills
 ### Verify Setup
 
 ```bash
-node skills/governance/scripts/governance-check.mjs
+node scripts/governance-check.mjs
 ```
 
 ## How It Works
@@ -41,9 +42,28 @@ When Claude detects trigger phrases like "code review", "commit", "standards", o
 3. Checklists for PRs and commits
 4. Links to authoritative documentation
 
-## The Two-Document Model
+The skill delegates to the built-in `reviewer` subagent for context efficiency (70–90% token savings vs. inline execution).
 
-This skill enforces a separation of concerns:
+## File Structure
+
+```
+governance-claude-skill/
+├── .claude/
+│   └── agents/
+│       └── governance-specialist.md    # repo-local development agent
+├── scripts/
+│   └── governance-check.mjs           # setup verification script
+├── templates/
+│   ├── standards-template.md          # full-featured standards template
+│   └── audit-standards-template.mjs   # configurable audit script
+├── agent-prompt.md                    # full agent protocol
+├── SKILL.md                           # thin dispatcher (v2.1.0)
+└── standards.md                       # minimal working default
+```
+
+**Note**: `.claude/agents/governance-specialist.md` is kept for repo-local development use only. It is NOT required for the skill to work — the skill uses the built-in `reviewer` subagent type.
+
+## The Two-Document Model
 
 | Document | Purpose | Update Frequency |
 |----------|---------|------------------|
@@ -53,42 +73,34 @@ This skill enforces a separation of concerns:
 **Benefits:**
 - CLAUDE.md stays lean (better token efficiency)
 - standards.md is the single source of truth for policy
-- No duplication drift between documents
 
 ## Setting Up in Your Project
 
-1. **Create CLAUDE.md** at project root with:
-   - Build commands
-   - Project structure
-   - Cross-references to standards.md
+1. **Install the skill** (see Quick Start above)
 
-2. **Create docs/architecture/standards.md** with:
-   - Code quality standards
-   - Testing requirements
-   - Workflow processes
-
-3. **Create audit script** for automated compliance:
+2. **Copy the starter standards.md** to your project:
    ```bash
-   # Copy template
-   cp templates/audit-standards-template.mjs scripts/audit-standards.mjs
+   cp ~/.claude/skills/governance/standards.md standards.md
+   # Or to the traditional location:
+   cp ~/.claude/skills/governance/standards.md docs/architecture/standards.md
+   ```
+   Edit it with your project-specific rules. Full template at `templates/standards-template.md`.
 
-   # Add npm script
-   # "audit:standards": "node scripts/audit-standards.mjs"
+3. **Add CLAUDE.md** at project root with build commands and a cross-reference:
+   ```markdown
+   > **Standards**: [standards.md](standards.md)
    ```
 
-4. **Run setup check**:
+4. **Create audit script** for automated compliance:
    ```bash
-   node skills/governance/scripts/governance-check.mjs
+   cp ~/.claude/skills/governance/templates/audit-standards-template.mjs scripts/audit-standards.mjs
+   # Add to package.json: "audit:standards": "node scripts/audit-standards.mjs"
    ```
 
-## Templates
-
-The `templates/` directory contains clean starting files:
-
-| Template | Purpose |
-|----------|---------|
-| `standards-template.md` | Engineering standards document |
-| `audit-standards-template.mjs` | Configurable compliance checker |
+5. **Run setup check**:
+   ```bash
+   node scripts/governance-check.mjs
+   ```
 
 ## Governance Check Output
 
@@ -102,7 +114,7 @@ The `templates/` directory contains clean starting files:
 ✓ Concise length (452 lines)
 
 2. standards.md (Engineering Policy)
-✓ standards.md exists at docs/architecture/
+✓ standards.md found at root
 ✓ Has Code Quality section
 ✓ Has Testing section
 ✓ Has Workflow section
@@ -139,13 +151,11 @@ Governance Score: 100%
 |--------------|-----------------|
 | ❌ Commit to main | ✅ Feature branches with PR |
 | ❌ Skip audit | ✅ Run `audit:standards` before commit |
-| ❌ Merge without review | ✅ Require approval |
+| ❌ Defer issues | ✅ Fix immediately |
 
 ## Changelog
 
-### 2.0.1 (2026-02-10)
-
-- **Fixed**: Corrected script invocation paths to use `skills/governance/scripts/` nested structure
+See [CHANGELOG.md](CHANGELOG.md) for full history.
 
 ## Contributing
 
