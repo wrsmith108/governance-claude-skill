@@ -1,6 +1,6 @@
 {
   "name": "@wrsmith108/governance-skill",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Claude Code skill for engineering standards enforcement with parallel agent execution",
   "keywords": [
     "claude",
@@ -26,15 +26,18 @@
     "url": "https://github.com/wrsmith108/governance-claude-skill/issues"
   },
   "files": [
-    "skills",
+    "scripts",
     "templates",
     ".claude/agents",
+    "agent-prompt.md",
+    "standards.md",
+    "SKILL.md",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "check": "node skills/governance/scripts/governance-check.mjs",
-    "setup": "node skills/governance/scripts/governance-check.mjs",
+    "check": "node scripts/governance-check.mjs",
+    "setup": "node scripts/governance-check.mjs",
     "validate": "npx @skillsmith/cli validate .",
     "publish:registry": "npx @skillsmith/cli publish"
   },
@@ -42,7 +45,7 @@
     "name": "Governance",
     "description": "Enforce engineering standards during code reviews and commits with parallel agent execution for 70-90% token savings",
     "skills": [
-      "skills/governance"
+      "."
     ],
     "agents": [
       ".claude/agents/governance-specialist.md"
