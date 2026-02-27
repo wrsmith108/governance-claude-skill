@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.1.0] - 2026-02-26
+
+### Changed
+- **Structural flattening**: Removed redundant `skills/governance/` nested directory. The repo root IS the skill — matches how Skillsmith installs to `~/.claude/skills/governance/`
+- **Thin dispatcher pattern**: `SKILL.md` is now a thin orchestrator (~60 lines); full agent protocol extracted to new `agent-prompt.md`
+- **`delegates_to` updated**: Changed from custom `governance-specialist` to built-in `reviewer` subagent type — works in all Claude Code installations without any custom agent setup
+- **Scripts path corrected**: `scripts/governance-check.mjs` is now at repo root `scripts/` (was nested at `skills/governance/scripts/`)
+
+### Added
+- `agent-prompt.md`: Full governance agent protocol (operating instructions, task types, anti-pattern tables, output format)
+- `standards.md`: Minimal working default standards document — install and go. Replace/extend with project-specific rules. Full template still available at `templates/standards-template.md`
+- `scripts/governance-check.mjs` **now checks** for `standards.md` existence and reports a clear failure with copy instructions if missing
+
+### Fixed
+- Broken skill on fresh install: `standards.md` was only a template, not a ready-to-use file — new installs no longer start broken
+- `governance-specialist` subagent not portable: replaced with built-in `reviewer` type
+
+### Lesson Learned
+Providing only a template for a required dependency (standards.md) means the skill is broken out of the box. A minimal working default is better than a comprehensive template that never gets created.
+
+---
+
 ## [2.0.1] - 2026-02-10
 
 ### Fixed
@@ -48,34 +70,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Lesson Learned
 Governance documentation tends to grow in CLAUDE.md, causing context bloat. Extracting to a skill keeps CLAUDE.md lean while providing proactive enforcement during high-stakes activities (commits, PRs).
-
----
-
-## Future Improvements (Planned)
-
-### [1.1.0] - TBD
-- [ ] Hook integration for post-edit suggestions
-- [ ] Project-type detection (Node.js, Python, Go) for tailored checks
-- [ ] Integration with CI/CD pipelines
-
----
-
-## Template
-
-Use this template for future changelog entries:
-
-```markdown
-## [X.Y.Z] - YYYY-MM-DD
-
-### Added
-- New features
-
-### Changed
-- Updates to existing features
-
-### Fixed
-- Bug fixes
-
-### Lesson Learned
-Key insight that led to this change — helps future maintainers understand the "why"
-```
