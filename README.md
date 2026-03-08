@@ -4,7 +4,7 @@ An agent skill for enforcing engineering standards and code governance. Provides
 
 ## Features
 
-- **Proactive Triggers** — Activates on "code review", "commit", "standards", "compliance"
+- **Proactive Triggers** — Activates on "code review", "commit", "standards", "compliance", "retro",
 - **Two-Document Model** — Separates CLAUDE.md (operational) from standards.md (policy)
 - **Setup Verification** — `scripts/governance-check.mjs` validates configuration with actionable fixes
 - **Anti-Pattern Tables** — Code quality, documentation, workflow, and testing anti-patterns
