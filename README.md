@@ -35,7 +35,7 @@ node scripts/governance-check.mjs
 
 ## How It Works
 
-When Claude detects trigger phrases like "code review", "commit", "standards", or "compliance", this skill activates and provides:
+When your agent (such as Claude) detects trigger phrases like "code review", "commit", "standards", or "compliance", this skill activates and provides:
 
 1. Quick reference to relevant standards
 2. Reminder to run `npm run audit:standards`
