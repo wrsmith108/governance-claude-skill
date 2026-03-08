@@ -1,6 +1,6 @@
 # Governance Skill for Claude Code
 
-A [Claude Code](https://claude.ai/code) skill for enforcing engineering standards and code governance. Provides proactive reminders during code reviews and commits.
+An agent skill for enforcing engineering standards and code governance. Provides proactive reminders during code reviews and commits.
 
 ## Features
 
