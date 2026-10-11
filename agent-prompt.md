@@ -480,7 +480,7 @@ Full template: [templates/code-review-template.md](templates/code-review-templat
 
 - File naming: `YYYY-MM-DD-<brief-slug>.md`
 - Required sections: Summary, Pre-Review Checks, Files Reviewed, Sweeps Performed, Findings, CI Impact Assessment
-- Finding statuses: `Fixed` (with commit), `Excepted` (architectural, minimal fix applied now), `Pre-existing`
+- Finding statuses: `Fixed (<commit>)`, e.g. `Fixed (abc1234)`, `Excepted` (architectural, minimal fix applied now), `Pre-existing`
 
 ---
 

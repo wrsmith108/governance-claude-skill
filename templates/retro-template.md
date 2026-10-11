@@ -59,7 +59,7 @@
 
 | Finding | Severity | Resolution |
 |---------|----------|------------|
-| Description | Critical/High/Medium/Low | Fixed (commit) / Excepted / Pre-existing |
+| Description | Critical/High/Medium/Low | Fixed (abc1234) / Excepted / Pre-existing |
 
 ---
 

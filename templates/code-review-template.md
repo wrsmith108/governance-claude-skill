@@ -50,7 +50,7 @@ State "no siblings exist" as a row rather than omitting it. That is a finding of
 
 | Finding | Severity | Standard | Status |
 |---------|----------|----------|--------|
-| Description | Critical/High/Medium/Low | §N | Fixed (commit) / Excepted / Pre-existing |
+| Description | Critical/High/Medium/Low | §N | Fixed (abc1234) / Excepted / Pre-existing |
 
 ## CI Impact Assessment
 
@@ -91,7 +91,7 @@ State "no siblings exist" as a row rather than omitting it. That is a finding of
 
 | Status | Meaning |
 |--------|---------|
-| **Fixed (commit)** | Fixed in this change; cite the commit |
+| **Fixed (<commit>)** | Fixed in this change; cite the commit hash in lowercase hex, e.g. `Fixed (abc1234)` |
 | **Excepted** | Architectural scope: a minimal fix was applied now and the remainder is recorded, with the reason written in the PR description |
 | **Pre-existing** | Unrelated to this change: recorded (in the tracker if one is connected, otherwise in this report), with the reason written in the PR description |
 
