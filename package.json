@@ -29,11 +29,13 @@
     "scripts",
     "templates",
     ".claude/agents",
+    ".claude-plugin",
     "agent-prompt.md",
     "standards.md",
     "SKILL.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "check": "node scripts/governance-check.mjs",

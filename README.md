@@ -53,6 +53,8 @@ governance-claude-skill/
 ├── .claude/
 │   └── agents/
 │       └── governance-specialist.md    # thin pointer to agent-prompt.md
+├── .claude-plugin/
+│   └── plugin.json                    # Claude plugin manifest
 ├── scripts/
 │   └── governance-check.mjs           # setup verification script
 ├── templates/
@@ -62,7 +64,11 @@ governance-claude-skill/
 │   └── audit-standards-template.mjs   # configurable audit script
 ├── agent-prompt.md                    # full agent protocol
 ├── SKILL.md                           # thin dispatcher (v2.2.0)
-└── standards.md                       # minimal working default
+├── standards.md                       # minimal working default
+├── package.json                       # package metadata and published file list
+├── CHANGELOG.md                       # version history
+├── LICENSE                            # MIT license
+└── README.md                          # this file
 ```
 
 **Note**: `.claude/agents/governance-specialist.md` is shipped and listed in `package.json`, so anyone invoking it keeps working. It is a thin pointer that tells the agent to read and follow `agent-prompt.md`, the same protocol the skill uses. The skill itself delegates to the built-in `reviewer` subagent and does not require it.

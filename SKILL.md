@@ -38,6 +38,7 @@ allowed-tools:
   - Edit
   - Grep
   - Glob
+  - Task
 ---
 
 # Governance Skill
@@ -75,7 +76,7 @@ The full rules live in `agent-prompt.md`. The reviewer covers:
 - **Type safety** — no unjustified `any`, explicit types at boundaries
 - **Constant and mock consistency** — one canonical home per shared constant; mocks match real shapes
 - **External-API contracts** — and anti-false-green mocks that pass whatever the code does
-- **Shared-state and concurrency audit** — races, cache-key mismatches, check-then-act gaps
+- **Shared-state and concurrency audit** — five checks: global reads outside the producer, re-firing lifecycle listeners, missing re-fire tests, double reads of a module-level singleton across an `await`, and unguarded async-completion writes to shared state
 - **Duplicate security gates and sibling implementations** — the same guard or logic must not diverge across copies
 - **Observation and gate correctness in verification code** — a check must be able to fail, and must examine what it claims to
 - **Zero deferral** — every finding is fixed now, with narrow, documented exceptions

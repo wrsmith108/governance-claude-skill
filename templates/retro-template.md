@@ -63,6 +63,18 @@
 
 ---
 
+## Sweeps Performed
+
+Required whenever the PR diff adds or changes a correctness-bearing guard. One row per guard. An empty section on a guard-hardening PR is itself a finding: a sweep that found nothing and a sweep that never ran read identically without this table. Fetch the sweep from the PR description if that is where it was recorded.
+
+| Guard | Command run | Result set | Disposition |
+|-------|-------------|------------|-------------|
+| `assertSafePath` | `grep -rn 'writeFile(' src --include='*.ts'` | 2 sites | 2 fixed (commit abc1234) |
+
+State "no siblings exist" as a row rather than omitting it. Write `N/A — no guard changed` when the trigger genuinely is not present, so a skip is visible rather than inferred from silence.
+
+---
+
 ## Waves Summary (if multi-wave)
 
 | Wave | Issue tracker reference, if any | Scope | Commits |
@@ -96,6 +108,7 @@
 | **Metrics** | Yes | Quantitative outcomes |
 | **Breaking Changes** | If applicable | Document any breaking changes |
 | **Code Review Findings** | If applicable | Per-wave breakdown |
+| **Sweeps Performed** | Yes | One row per changed guard (Guard, Command, Result Set, Disposition), or `N/A — no guard changed` |
 | **Waves Summary** | If multi-wave | Links issues (if tracked) to commits |
 | **Key Lessons** | Yes | Actionable learnings |
 | **Recommendations** | Yes | Forward-looking guidance |
@@ -111,7 +124,7 @@ Before saving your retrospective:
 - [ ] Metrics are accurate (including code review findings)
 - [ ] Key lessons are actionable
 - [ ] Breaking changes documented (if applicable)
-- [ ] `Sweeps Performed` declaration made (rows, or `N/A — no guard changed`)
+- [ ] `## Sweeps Performed` section filled in (rows, or `N/A — no guard changed`)
 - [ ] **Report written to `docs/retro/`**
 
 ## Common Patterns

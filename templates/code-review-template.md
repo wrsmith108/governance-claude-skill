@@ -28,7 +28,7 @@ Brief description of what was reviewed.
 | `npm run typecheck` | PASS/FAIL |
 | `npm run lint` | PASS/FAIL |
 | `npm run test` | PASS/FAIL |
-| `npm run audit:standards` (if configured) | PASS/FAIL |
+| `npm run audit:standards` (required if the project has an audit script) | PASS/FAIL/N/A (no audit script) |
 
 ## Files Reviewed
 
@@ -80,7 +80,7 @@ State "no siblings exist" as a row rather than omitting it. That is a finding of
 | **Related issues** | No | Issue tracker reference, if a tracker is used |
 | **Files Changed** | Yes | Count of files reviewed |
 | **Execution environment validated** | Yes | Whether commands ran in the project's documented execution environment (container, venv, nvm, etc.) |
-| **Pre-Review Checks** | Yes | All 4 checks must be run |
+| **Pre-Review Checks** | Yes | typecheck, lint and test always run; `audit:standards` is required whenever the project has an audit script, otherwise record `N/A (no audit script)` |
 | **Sweeps Performed** | Yes | One row per changed guard, or the `N/A` line |
 | **Findings** | Yes | Even if empty, document it |
 | **CI Impact Assessment** | Yes | All 4 checkboxes must be addressed |
@@ -95,7 +95,11 @@ State "no siblings exist" as a row rather than omitting it. That is a finding of
 | **Excepted** | Architectural scope: a minimal fix was applied now and the remainder is recorded, with the reason written in the PR description |
 | **Pre-existing** | Unrelated to this change: recorded (in the tracker if one is connected, otherwise in this report), with the reason written in the PR description |
 
-**Gate**: the review passes only when the Findings table has zero rows whose status is not Fixed, Excepted or Pre-existing.
+**Gate**: the review passes only when the Findings table has zero rows whose status is not Fixed, Excepted or Pre-existing. Check it mechanically (the command examines only the `## Findings` section, so the other tables in the report cannot trigger it; it prints each offending row and exits 1, and prints nothing and exits 0 when the gate holds):
+
+```bash
+awk '/^## /{f=($0 ~ /^## Findings[ \t]*$/)} f && /^\|/ {if(++n>2){split($0,c,"|"); if(c[5] !~ /^ *(Fixed|Excepted|Pre-existing)/){print; bad=1}}} END{exit bad}' <report>.md
+```
 
 ## Severity Guide
 

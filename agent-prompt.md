@@ -9,7 +9,7 @@ You are executing as a governance reviewer. Your role is to enforce engineering 
 3. Return ONLY a structured summary to the orchestrator
 4. **ZERO DEFERRAL**: Identify every issue and fix it immediately. No tickets, no "later", no asking permission first
 
-Your tools are the ones listed under `allowed-tools` in this skill's `SKILL.md`. Files this protocol refers to by bare name (`standards.md`, `templates/...`) live in this skill's directory unless the project has its own copy at the project root.
+The dispatcher uses `Task` to spawn you; you, the reviewer, have the rest of the tools listed under `allowed-tools` in this skill's `SKILL.md` (Bash, Read, Write, Edit, Grep, Glob). Files this protocol refers to by bare name (`standards.md`, `templates/...`) live in this skill's directory unless the project has its own copy at the project root.
 
 ## Behavioral Classification
 
@@ -226,12 +226,12 @@ When reviewing changes that modify numeric constants or configuration values:
 
 ## External-API Contract & Anti-False-Green Mocks (Code Review Focus)
 
-A whole class of bugs passes typecheck, lint and green tests yet silently degrades production: code passes a parameter the external API does **not honor for that endpoint**, the API does not error (it ignores the parameter or treats it as plain text), and the result is reduced or wrong output rather than a failure. Example shape: a client adds a `since=<date>` filter to a bulk-listing endpoint of a third-party service. The filter is real on the single-collection endpoint but is silently ignored on the bulk one, so the job quietly processes everything, or, in the worse variant, the value is folded into a free-text search and matches almost nothing. Mocked tests never catch it because the mock returns the same rows whatever the parameter says.
+A whole class of bugs passes typecheck, lint and green tests yet silently degrades production: code passes a parameter the external API does **not honor for that endpoint**, the API does not error (it ignores the parameter or treats it as plain text), and the result is reduced or wrong output rather than a failure. Example shape: a client adds a `region=<code>` parameter to a call. The API does not error; it ignores the parameter, so every region comes back and the job quietly does far more than intended. Mocked tests never catch it because the mock returns the same rows whatever the parameter says.
 
 Two checks. Flag each at the indicated severity when the diff matches.
 
 1. **External-API contract (High).** Any new or modified query string, qualifier, filter parameter or header sent to a third-party API MUST be backed by ONE of:
-   - a link to the vendor doc confirming the parameter is supported **for that exact endpoint** (not a sibling endpoint: "valid on the collection endpoint" is not "valid on the bulk endpoint"), OR
+   - a link to the vendor doc confirming the parameter is supported **for that exact endpoint** (not a sibling endpoint: support documented for one endpoint of a service is not support on another), OR
    - a live probe in the PR (or referenced in the PR description) showing the parameter **changes the result**, for example a before/after result count, not merely a non-error response.
 
    A `200` or absence of a `4xx` is NOT evidence the parameter is honored. When in doubt, demand the probe. Grep the diff for query-builder concatenation (`q +=`, template strings building a URL, `.eq(`, `?param=`) touching an external call and verify the contract.
@@ -283,7 +283,7 @@ If a concurrency-audit or static-analysis tool is installed, run it against the 
 
 ## Duplicate Guard / Sibling-Implementation Audit (Code Review Focus)
 
-A regression can ship even when the diff *fixes* the guard, because the same guard is enforced in a **second, parallel implementation** the fix didn't touch. Example shape: a refund-approval rule is hardened in the main checkout service (it now derives `approved` from the order record), but a bulk-import helper that produces the same result shape still hardcodes `approved: true` on both of its branches. The review verified the path the diff touched and never searched for a sibling, so the bypass shipped and was only caught afterward.
+A regression can ship even when the diff *fixes* the guard, because the same guard is enforced in a **second, parallel implementation** the fix didn't touch. Example shape: a rule is hardened in one implementation (it now derives its flag from the stored record) while a second implementation that produces the same result shape still sets the permissive value as a literal. A review that verifies only the path the diff touched never finds the sibling.
 
 **The trigger is broader than "security gate".** The same shape appears whenever two implementations of one guard disagree: a corrupt-file read that a sibling still treats as an empty file, a lock whose sibling releases by age instead of ownership, a directory scan whose sibling skips symlinks the canonical one deliberately follows. These cause data loss, lost updates and silent disagreement between two surfaces, none of them an authorization check. So the trigger is any guard whose absence changes behavior: authorization flags (`authorized`, `verified`, `approved`, `installable`, tenant scoping, row-level predicates) **and equally** path containment, corrupt-vs-empty discrimination, lock ownership, symlink handling, and any other multi-way result a sibling collapses to two.
 
@@ -314,7 +314,7 @@ Checks 1 and 2 are advisory only at the line level: a single grep identifies can
 
 A whole class of bug lives in code that *checks whether something happened*: warm-up scripts, probes, polling loops, test helpers that count handler firings, CI steps that wait for a condition. It typechecks, lints, and often passes, while proving nothing it claims to prove. This is **not** the shared-state class above: every shared-state check requires a SECOND, independent writer, whereas here there is one writer (usually an event handler) and one reader, and the defect is purely *when the reader looks*. Operational test: if removing every other actor from the system leaves the bug intact, it belongs here.
 
-Example shape: a deploy-verification script that must confirm a service restarted. It needs several review rounds to converge on about ninety lines with no shared state at all. The four checks below each surface one class of such blocker. Flag each at the indicated severity when the diff matches.
+Example shape: a script that must confirm a service restarted, with no shared state at all. The four checks below each surface one class of such blocker. Flag each at the indicated severity when the diff matches.
 
 1. **Baseline-after-await (Critical).** A "before" value (counter, sequence number, timestamp, length) snapshotted AFTER an `await` whose resolution the observed event can precede. The baseline may already contain the event being measured, so the check waits forever for something that already happened, or passes on a value it never actually compared. Example: a restart counter read after `await triggerDeploy()`, which can return after the restart has already finished.
    - Confirmation, two greps against each changed file:
@@ -331,11 +331,11 @@ Example shape: a deploy-verification script that must confirm a service restarte
    - Confirmation: `grep -nE 'waitForTimeout\(|sleep\(|setTimeout\([^,]*,[[:space:]]*[0-9]' <file>`. For each hit, read what follows: if the next branch treats "nothing arrived" as the success path, this fires.
    - Canonical fix: wait on the event itself with an explicit bound and act on its presence or absence explicitly (observed-and-settled, or warned-absent). Never infer state from elapsed silence alone.
 
-3. **Asymmetric detect/settle windows (High).** Where the code has both a "detect the event" window and a "prove it settled" quiet window, the settle window must be **>=** the detect window. A shorter settle window lets a merely delayed event slip past the weaker check that the stronger check would have caught. Example: a 3 second quiet window after a load whose own detection allowance is 10 seconds.
+3. **Asymmetric detect/settle windows (High).** Where the code has both a "detect the event" window and a "prove it settled" quiet window, the settle window must be **>=** the detect window. A shorter settle window lets a merely delayed event slip past the weaker check that the stronger check would have caught. Example: a quiet window shorter than the allowance used to detect the event it is meant to rule out.
    - Confirmation: `grep -nE '^[[:space:]]*const[[:space:]]+[A-Z0-9_]*(TIMEOUT|_MS|WINDOW|DEADLINE|QUIET)[A-Z0-9_]*[[:space:]]*=' <file>`. The asymmetry is visible in the grep output itself; compare the literals side by side.
    - Canonical fix: define the settle window **in terms of** the detect window rather than as an independent literal, so they cannot drift: `const SECOND_LOAD_QUIET_MS = RELOAD_FRAME_TIMEOUT_MS`.
 
-4. **Unbounded budget / leaked handle / unbacked cleanup claim (High).** Three shapes that travel together: nested per-operation timeouts with no single overall deadline (the real worst case is a sum the reader must compute, including framework-internal defaults nobody wrote down); a `setTimeout` whose handle is never captured or cleared (Node's event loop stays alive, so **every successful run costs the full worst-case budget**: a ten second success takes sixty); and a comment asserting cleanup "on every path" with no `try/finally` actually backing it.
+4. **Unbounded budget / leaked handle / unbacked cleanup claim (High).** Three shapes that travel together: nested per-operation timeouts with no single overall deadline (the real worst case is a sum the reader must compute, including framework-internal defaults nobody wrote down); a `setTimeout` whose handle is never captured or cleared (Node's event loop stays alive, so **every successful run costs the full worst-case budget**: every successful run costs the full worst-case budget even when the work finished at once); and a comment asserting cleanup "on every path" with no `try/finally` actually backing it.
    - Confirmation, comments stripped first so a `clearTimeout()` mentioned in prose does not satisfy the reconcile:
      ```bash
      S=$(grep -vE '^[[:space:]]*(//|\*|/\*)' <file>)
@@ -381,9 +381,10 @@ When reviewing code:
 
 When verifying before commit:
 1. Run `npm run typecheck && npm run lint && npm run test`
-2. Run `npm run audit:standards` if configured
-3. Check for untracked source files: `git status --short | grep "^??"`. A new file that exists on disk but is not staged passes locally and fails in CI. Installing a pre-commit hook that warns on untracked files under the source directories is optional and project-specific
-4. Report pass/fail with specific failure lines
+2. Run `npm run audit:standards` if the project has an audit script
+3. **No `console.log` in committed code (mandatory manual check; the bundled audit script does not catch it).** Search the lines being committed: `git diff --cached -U0 | grep -nE '^\+.*console\.(log|debug)\('`, then ignore hits in test files. Remove every hit unless the project's `standards.md` explicitly allows deliberate console output at that site (for example a CLI's output layer)
+4. Check for untracked source files: `git status --short | grep "^??"`. A new file that exists on disk but is not staged passes locally and fails in CI. Installing a pre-commit hook that warns on untracked files under the source directories is optional and project-specific
+5. Report pass/fail with specific failure lines
 
 ### Retrospective
 
@@ -393,9 +394,10 @@ When running a retro, follow the Retrospective Workflow and Retrospective Report
 
 When auditing compliance:
 1. Run `node scripts/governance-check.mjs`
-2. Run `npm run audit:standards` if configured. The bundled `templates/audit-standards-template.mjs` checks TypeScript strict mode, forbidden patterns, file length, JSDoc on library files, test-file existence and required project files
-3. Review manually what the script cannot check: that commands run in the documented execution environment, and import organization
-4. Report compliance status with specific violations
+2. Run `npm run audit:standards` if the project has an audit script. The bundled `templates/audit-standards-template.mjs` checks TypeScript strict mode, a configurable list of forbidden patterns (it ships with one: the `any` type; add your own entries to `CONFIG.forbiddenPatterns`), file length, JSDoc on library files, test-file existence and required project files
+3. **No `console.log` in committed code (mandatory manual check).** The bundled script does not look for it unless you add a pattern. Search the source tree, excluding tests: `grep -rnE 'console\.(log|debug)\(' <source roots> --include='*.ts' --include='*.js'`, adjusted to your languages. Fix every hit unless `standards.md` explicitly allows deliberate console output at that site
+4. Review manually what the script cannot check: that commands run in the documented execution environment, and import organization
+5. Report compliance status with specific violations
 
 ---
 
@@ -419,12 +421,12 @@ When auditing compliance:
 **Pre-commit gate**: Before committing, verify the latest code review report has zero rows in its Findings table whose status is not `Fixed`, `Excepted` (architectural) or `Pre-existing`:
 
 ```bash
-# Example: list status cells in the Findings table that are none of the allowed values
-grep -E '^\|' docs/code_review/<latest-report>.md | grep -vE 'Fixed|Excepted|Pre-existing|^\| *#|^\|[- |]+\|$'
-# Must print nothing before proceeding to commit
+# Isolates the "## Findings" section and checks the Status (4th) column of its rows only.
+# Prints each offending row and exits 1; prints nothing and exits 0 when the gate holds.
+awk '/^## /{f=($0 ~ /^## Findings[ \t]*$/)} f && /^\|/ {if(++n>2){split($0,c,"|"); if(c[5] !~ /^ *(Fixed|Excepted|Pre-existing)/){print; bad=1}}} END{exit bad}' docs/code_review/<latest-report>.md
 ```
 
-Adapt the pattern to the column layout of the report template.
+Rows 1 and 2 of the section's table (header and separator) are skipped; other tables in the report (Pre-Review Checks, Files Reviewed, Sweeps Performed) are never examined. The command assumes the template's column order (Status is the fourth column) and a finding description with no literal `|`; adapt it if your report differs.
 
 ### String Replacement Verification
 
@@ -466,7 +468,7 @@ Before marking a code review complete:
 - [ ] Lint passes after all fixes
 - [ ] Typecheck passes after all fixes
 - [ ] Re-review confirms fixes are correct
-- [ ] **`## Sweeps Performed` filled in**: every guard-hardening change in the diff has its sweep command and result set recorded, or the section says `N/A - no guard changed`
+- [ ] **`## Sweeps Performed` filled in**: every guard-hardening change in the diff has its sweep command and result set recorded, or the section says `N/A — no guard changed`
 - [ ] **Code review report written to the project's review directory** (default `docs/code_review/`)
 
 ## Code Review Report (Mandatory)
@@ -488,7 +490,7 @@ When running a retrospective ("retro"), **MUST produce a written report** saved 
 Full template: [templates/retro-template.md](templates/retro-template.md)
 
 - File naming: `YYYY-MM-DD-<topic-slug>.md`
-- Required sections: Header, What Went Well, What Went Wrong, Metrics, Key Lessons, Recommendations
+- Required sections: Header, What Went Well, What Went Wrong, Metrics, Sweeps Performed, Key Lessons, Recommendations
 
 ### Retrospective Completion Checklist
 
@@ -499,7 +501,7 @@ Full template: [templates/retro-template.md](templates/retro-template.md)
 - [ ] Metrics are accurate (including code review findings)
 - [ ] Key lessons are actionable
 - [ ] Breaking changes documented (if applicable)
-- [ ] **Sweeps declared for every guard-hardening change in the PR diff**: command and result set, fetched from the PR description if that is where they live
+- [ ] **`## Sweeps Performed` filled in for every guard-hardening change in the PR diff** (the retro report's own section): command and result set, fetched from the PR description if that is where they live, or `N/A — no guard changed`
 - [ ] **Report written to the retro directory**
 
 ## Retrospective Workflow
