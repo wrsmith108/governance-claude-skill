@@ -418,12 +418,13 @@ When auditing compliance:
 
 "Record" means an issue in the tracker if one is connected (Linear, GitHub Issues, Jira), otherwise an entry in the code review report. In both cases write the exclusion reason in the PR description. Never silently skip.
 
-**Pre-commit gate**: Before committing, verify the latest code review report has zero rows in its Findings table whose status is not `Fixed`, `Excepted` (architectural) or `Pre-existing`:
+**Pre-commit gate**: Before committing, verify the latest code review report has zero rows in its Findings table whose status is not exactly `Fixed (<commit>)`, `Excepted` (architectural) or `Pre-existing`:
 
 ```bash
 # Isolates the "## Findings" section and checks the Status (4th) column of its rows only.
+# The whole cell must be one allowed status: "Fixed later" or "Excepted pending" fail.
 # Prints each offending row and exits 1; prints nothing and exits 0 when the gate holds.
-awk '/^## /{f=($0 ~ /^## Findings[ \t]*$/)} f && /^\|/ {if(++n>2){split($0,c,"|"); if(c[5] !~ /^ *(Fixed|Excepted|Pre-existing)/){print; bad=1}}} END{exit bad}' docs/code_review/<latest-report>.md
+awk '/^## /{f=($0 ~ /^## Findings[ \t]*$/)} f && /^\|/ {if(++n>2){split($0,c,"|"); if(c[5] !~ /^ *(Fixed \([0-9a-f]+\)|Excepted|Pre-existing) *$/){print; bad=1}}} END{exit bad}' docs/code_review/<latest-report>.md
 ```
 
 Rows 1 and 2 of the section's table (header and separator) are skipped; other tables in the report (Pre-Review Checks, Files Reviewed, Sweeps Performed) are never examined. The command assumes the template's column order (Status is the fourth column) and a finding description with no literal `|`; adapt it if your report differs.

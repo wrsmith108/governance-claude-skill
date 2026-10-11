@@ -95,10 +95,10 @@ State "no siblings exist" as a row rather than omitting it. That is a finding of
 | **Excepted** | Architectural scope: a minimal fix was applied now and the remainder is recorded, with the reason written in the PR description |
 | **Pre-existing** | Unrelated to this change: recorded (in the tracker if one is connected, otherwise in this report), with the reason written in the PR description |
 
-**Gate**: the review passes only when the Findings table has zero rows whose status is not Fixed, Excepted or Pre-existing. Check it mechanically (the command examines only the `## Findings` section, so the other tables in the report cannot trigger it; it prints each offending row and exits 1, and prints nothing and exits 0 when the gate holds):
+**Gate**: the review passes only when every Findings row's status is exactly `Fixed (<commit>)`, `Excepted` or `Pre-existing`. Check it mechanically (the command examines only the `## Findings` section, so the other tables in the report cannot trigger it; the whole cell must match, so "Fixed later" fails; it prints each offending row and exits 1, and prints nothing and exits 0 when the gate holds):
 
 ```bash
-awk '/^## /{f=($0 ~ /^## Findings[ \t]*$/)} f && /^\|/ {if(++n>2){split($0,c,"|"); if(c[5] !~ /^ *(Fixed|Excepted|Pre-existing)/){print; bad=1}}} END{exit bad}' <report>.md
+awk '/^## /{f=($0 ~ /^## Findings[ \t]*$/)} f && /^\|/ {if(++n>2){split($0,c,"|"); if(c[5] !~ /^ *(Fixed \([0-9a-f]+\)|Excepted|Pre-existing) *$/){print; bad=1}}} END{exit bad}' <report>.md
 ```
 
 ## Severity Guide
