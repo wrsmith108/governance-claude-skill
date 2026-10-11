@@ -14,9 +14,9 @@
 ### 1.1 Language Standards
 
 - **TypeScript strict mode** required (`"strict": true` in `tsconfig.json`)
-- No `any` types — use `unknown` for external/untyped data
+- No `any` types without a justification comment — use `unknown` for external/untyped data
 - All exported functions and types must be explicitly typed
-- Use runtime validation (e.g., Zod) at system boundaries (user input, external APIs)
+- Use schema validation (e.g., Zod) at system boundaries (user input, external APIs)
 
 ### 1.2 Naming Conventions
 
@@ -59,6 +59,8 @@ All code requires review before merge. Check for:
 
 ### 2.1 Coverage Requirements
 
+This section is the single source for the project's coverage threshold. The default is 80% for unit tests; other documents and review reports refer to it rather than restating a number.
+
 | Layer | Minimum | Framework |
 |-------|---------|-----------|
 | Unit tests | 80%+ | Vitest / Jest |
@@ -68,6 +70,7 @@ All code requires review before merge. Check for:
 ### 2.2 Culture
 
 - Write tests alongside code, not after
+- Mock external services only; do not mock the code under test or your own internal modules
 - Pre-commit hooks must pass tests before commit
 - Flaky tests are bugs — fix or quarantine immediately
 
@@ -103,6 +106,8 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 
 - **Never commit secrets** — use environment variables
 - Validate and sanitize all input at system boundaries
+- Guard against prototype pollution before parsing untrusted JSON into objects (reject or strip `__proto__`, `constructor` and `prototype` keys)
+- Spawn subprocesses with argument arrays (`execFile`), never a shell string
 - Principle of least privilege for all API/DB access
 
 ---

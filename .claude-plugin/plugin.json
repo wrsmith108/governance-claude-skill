@@ -1,7 +1,7 @@
 {
   "name": "governance",
-  "description": "Engineering standards and code governance enforcement with parallel agent execution for code reviews, commits, and standards audits.",
-  "version": "2.1.0",
+  "description": "Engineering standards and code governance enforcement for code reviews, commits, and standards audits, delegated to a single built-in reviewer subagent.",
+  "version": "2.2.0",
   "author": {
     "name": "Will Smith",
     "url": "https://github.com/wrsmith108"
