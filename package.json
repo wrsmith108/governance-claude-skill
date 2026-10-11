@@ -1,7 +1,7 @@
 {
   "name": "@wrsmith108/governance-skill",
-  "version": "2.1.0",
-  "description": "Claude Code skill for engineering standards enforcement with parallel agent execution",
+  "version": "2.2.0",
+  "description": "Claude Code skill for engineering standards enforcement, delegating reviews to a single built-in reviewer subagent",
   "keywords": [
     "claude",
     "claude-code",
@@ -43,7 +43,7 @@
   },
   "claude-plugin": {
     "name": "Governance",
-    "description": "Enforce engineering standards during code reviews and commits with parallel agent execution for 70-90% token savings",
+    "description": "Enforce engineering standards during code reviews and commits by delegating to a single built-in reviewer subagent",
     "skills": [
       "."
     ],

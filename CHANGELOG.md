@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.2.0] - 2026-10-11
+
+### Added
+- Approach validation: check the chosen approach is sound before reviewing details
+- Type safety rules: no unjustified `any`, explicit types at boundaries
+- Constant and mock consistency checks: one canonical home per shared constant, mocks that match real shapes
+- External-API contract checks, including anti-false-green mock rules
+- Shared-state and concurrency audit patterns
+- Checks for duplicate security gates and diverging sibling implementations
+- Observation and gate correctness rules for verification code: a check must be able to fail and must examine what it claims to
+- Zero-deferral rules with two documented exceptions (architectural scope; pre-existing and unrelated)
+- String-replacement sweeps after scripted edits
+- Severity guide: every severity is fixed
+- Retrospective protocol
+- `templates/code-review-template.md` and `templates/retro-template.md`
+- `standards.md`: justification comment for `any`, mock external services only, prototype-pollution guard before parsing untrusted JSON, `execFile` with argument arrays instead of shell strings
+
+### Changed
+- The dispatcher now tells the reviewer the path to `agent-prompt.md` and requires reading it first, replacing the placeholder text
+- `governance-specialist` is a thin pointer to `agent-prompt.md`, so there is one protocol
+- The coverage threshold is single-sourced in `standards.md` (default 80%)
+- Descriptions no longer claim parallel execution; the skill delegates to one built-in `reviewer` subagent
+
 ## [2.1.0] - 2026-02-26
 
 ### Changed

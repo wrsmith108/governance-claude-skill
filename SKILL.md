@@ -1,7 +1,7 @@
 ---
 name: governance
-version: "2.1.0"
-description: "Engineering standards and code governance enforcement with parallel agent execution. Triggers during code reviews, commits, and standards discussions. 70-90% token savings via delegated execution."
+version: "2.2.0"
+description: "Engineering standards and code governance enforcement. Triggers during code reviews, commits, and standards discussions. Delegates the review to a single built-in reviewer subagent so intermediate output stays out of the main conversation."
 category: development
 tags:
   - governance
@@ -42,7 +42,7 @@ allowed-tools:
 
 # Governance Skill
 
-Enforces engineering standards and code quality policies with parallel agent execution for context efficiency.
+Enforces engineering standards and code quality policies. The review runs in one delegated `reviewer` subagent, which keeps intermediate output out of the main conversation.
 
 > **Standards Document**: [standards.md](standards.md) (starter default — replace with your own)
 > **Audit Script**: `npm run audit:standards`
@@ -50,23 +50,38 @@ Enforces engineering standards and code quality policies with parallel agent exe
 
 ---
 
-## Execution Model (v2.1)
+## Execution Model (v2.2)
 
-**Type**: Delegated Execution — delegates to the built-in `reviewer` subagent type.
+**Type**: Delegated Execution — delegates to ONE built-in `reviewer` subagent.
 
-This skill uses the `reviewer` subagent (available in all Claude Code installations — no custom agent required):
+This skill uses the `reviewer` subagent type (available in all Claude Code installations — no custom agent required):
 
-1. **Spawn** the reviewer agent
-2. **Delegate** the governance task with instructions from `agent-prompt.md`
+1. **Spawn** a single reviewer agent
+2. **Delegate** the governance task, telling it to read `agent-prompt.md` in full first
 3. **Await** completion
 4. **Report** the structured summary to the user
 
-### Token Efficiency
+### Why Delegate
 
-| Execution Mode | Token Usage | Benefit |
-|----------------|-------------|---------|
-| Direct (v1.x) | ~3,000–8,000 | Full context in main thread |
-| Delegated (v2.x) | ~500–800 | 70–90% token savings |
+The reviewer runs commands, reads files and applies fixes in its own context. Only the structured summary returns to the main conversation, so the main thread does not carry the review's intermediate output.
+
+---
+
+## What's Checked
+
+The full rules live in `agent-prompt.md`. The reviewer covers:
+
+- **Approach validation** — is the chosen approach sound before the details are reviewed
+- **Type safety** — no unjustified `any`, explicit types at boundaries
+- **Constant and mock consistency** — one canonical home per shared constant; mocks match real shapes
+- **External-API contracts** — and anti-false-green mocks that pass whatever the code does
+- **Shared-state and concurrency audit** — races, cache-key mismatches, check-then-act gaps
+- **Duplicate security gates and sibling implementations** — the same guard or logic must not diverge across copies
+- **Observation and gate correctness in verification code** — a check must be able to fail, and must examine what it claims to
+- **Zero deferral** — every finding is fixed now, with narrow, documented exceptions
+- **String-replacement sweeps** — scripted edits are re-checked for dropped or mangled text
+- **Severity guide** — how findings are classified
+- **Retrospectives** — structured post-merge review
 
 ---
 
@@ -78,7 +93,8 @@ When this skill is triggered, read `agent-prompt.md` for the full protocol, then
 ```javascript
 Task({
   description: "Governance code review",
-  prompt: `[See agent-prompt.md for full instructions]
+  prompt: `Read <skill-dir>/agent-prompt.md in full before doing anything, and follow it.
+(<skill-dir> is the directory containing this SKILL.md, e.g. ~/.claude/skills/governance.)
 Review the following files for standards compliance:
 - [list files or PR description]
 
@@ -95,7 +111,8 @@ Execute full code review workflow:
 ```javascript
 Task({
   description: "Pre-commit governance",
-  prompt: `[See agent-prompt.md for full instructions]
+  prompt: `Read <skill-dir>/agent-prompt.md in full before doing anything, and follow it.
+(<skill-dir> is the directory containing this SKILL.md, e.g. ~/.claude/skills/governance.)
 Run pre-commit governance checks:
 1. typecheck, lint, format:check, test
 2. Check for untracked source files
@@ -108,7 +125,8 @@ Run pre-commit governance checks:
 ```javascript
 Task({
   description: "Run retrospective",
-  prompt: `[See agent-prompt.md for full instructions]
+  prompt: `Read <skill-dir>/agent-prompt.md in full before doing anything, and follow it.
+(<skill-dir> is the directory containing this SKILL.md, e.g. ~/.claude/skills/governance.)
 Run retrospective for [topic/sprint]:
 1. Analyze completed issues
 2. Gather metrics
@@ -143,4 +161,4 @@ node scripts/governance-check.mjs
 ---
 
 *Full agent protocol, anti-pattern tables, and output format in [agent-prompt.md](agent-prompt.md)*
-*Version 2.1.0 — Structural cleanup: flat layout, built-in reviewer agent, standards.md default added*
+*Version 2.2.0 — Expanded review rules, code-review and retro templates, dispatcher passes the protocol path*

@@ -8,10 +8,12 @@ An agent skill for enforcing engineering standards and code governance. Provides
 - **Two-Document Model** — Separates CLAUDE.md (operational) from standards.md (policy)
 - **Setup Verification** — `scripts/governance-check.mjs` validates configuration with actionable fixes
 - **Anti-Pattern Tables** — Code quality, documentation, workflow, and testing anti-patterns
+- **Deep Review Rules** (v2.2) — approach validation, type safety, constant and mock consistency, external-API contracts and anti-false-green mocks, shared-state/concurrency audit, duplicate security gates, verification-code correctness, zero deferral, string-replacement sweeps, severity guide, retrospectives
+- **Report Templates** (v2.2) — `code-review-template.md` and `retro-template.md`
 - **Pre-Commit Checklist** — Reminds about typecheck, lint, test before commits
 - **PR Review Checklist** — Standards for code review (correctness, security, performance)
 - **Ready-to-Use Default** — `standards.md` works out of the box; extend with your own rules
-- **No Custom Agent Required** — Uses the built-in `reviewer` subagent type (v2.1+)
+- **No Custom Agent Required** — Uses the built-in `reviewer` subagent type (v2.1+; protocol expanded in v2.2)
 
 ## Quick Start
 
@@ -42,7 +44,7 @@ When your agent (such as Claude) detects trigger phrases like "code review", "co
 3. Checklists for PRs and commits
 4. Links to authoritative documentation
 
-The skill delegates to the built-in `reviewer` subagent for context efficiency (70–90% token savings vs. inline execution).
+The skill delegates to the built-in `reviewer` subagent (one subagent, not several), so the review's intermediate output stays out of the main conversation.
 
 ## File Structure
 
@@ -50,18 +52,20 @@ The skill delegates to the built-in `reviewer` subagent for context efficiency (
 governance-claude-skill/
 ├── .claude/
 │   └── agents/
-│       └── governance-specialist.md    # repo-local development agent
+│       └── governance-specialist.md    # thin pointer to agent-prompt.md
 ├── scripts/
 │   └── governance-check.mjs           # setup verification script
 ├── templates/
 │   ├── standards-template.md          # full-featured standards template
+│   ├── code-review-template.md        # code review report template
+│   ├── retro-template.md              # retrospective report template
 │   └── audit-standards-template.mjs   # configurable audit script
 ├── agent-prompt.md                    # full agent protocol
-├── SKILL.md                           # thin dispatcher (v2.1.0)
+├── SKILL.md                           # thin dispatcher (v2.2.0)
 └── standards.md                       # minimal working default
 ```
 
-**Note**: `.claude/agents/governance-specialist.md` is kept for repo-local development use only. It is NOT required for the skill to work — the skill uses the built-in `reviewer` subagent type.
+**Note**: `.claude/agents/governance-specialist.md` is shipped and listed in `package.json`, so anyone invoking it keeps working. It is a thin pointer that tells the agent to read and follow `agent-prompt.md`, the same protocol the skill uses. The skill itself delegates to the built-in `reviewer` subagent and does not require it.
 
 ## The Two-Document Model
 
@@ -145,6 +149,14 @@ Governance Score: 100%
 | ❌ `any` type | ✅ `unknown` for external data |
 | ❌ 600+ line files | ✅ Split at 500 lines |
 | ❌ Hardcoded secrets | ✅ Environment variables |
+
+### Review Depth (v2.2)
+| Anti-Pattern | Correct Pattern |
+|--------------|-----------------|
+| ❌ Mock that passes whatever the code does | ✅ Mocks match the real external contract |
+| ❌ Same security gate copied and diverging | ✅ One implementation, or siblings kept in sync |
+| ❌ Verification that cannot fail | ✅ Checks that observe what they claim |
+| ❌ Findings left for later | ✅ Fix now, or record a documented exception |
 
 ### Workflow
 | Anti-Pattern | Correct Pattern |
